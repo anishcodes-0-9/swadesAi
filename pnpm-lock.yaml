@@ -42,6 +42,9 @@ importers:
       '@hono/node-server':
         specifier: ^1.19.13
         version: 1.19.13(hono@4.12.12)
+      '@swades-ai/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       ai:
         specifier: ^4.3.16
         version: 4.3.19(react@19.2.5)(zod@4.3.6)
