@@ -1,21 +1,74 @@
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { db, invoices, payments } from "../lib/db";
 import { desc } from "drizzle-orm";
 
 export class BillingAgent {
   async handle(input: { message: string }) {
-    const latestInvoice = await db.select().from(invoices).orderBy(desc(invoices.issuedAt)).limit(1);
-    const latestPayment = await db.select().from(payments).orderBy(desc(payments.createdAt)).limit(1);
+    const latestInvoices = await db
+      .select()
+      .from(invoices)
+      .orderBy(desc(invoices.issuedAt))
+      .limit(3);
+
+    const latestPayments = await db
+      .select()
+      .from(payments)
+      .orderBy(desc(payments.createdAt))
+      .limit(3);
+
+    const invoiceContext =
+      latestInvoices.length > 0
+        ? latestInvoices
+            .map(
+              (invoice) =>
+                `Invoice Number: ${invoice.invoiceNumber}
+Status: ${invoice.status}
+Amount: ${invoice.amount}
+Issued At: ${invoice.issuedAt}`
+            )
+            .join("\n\n")
+        : "No invoices found.";
+
+    const paymentContext =
+      latestPayments.length > 0
+        ? latestPayments
+            .map(
+              (payment) =>
+                `Payment ID: ${payment.id}
+Status: ${payment.status}
+Method: ${payment.paymentMethod}
+Amount: ${payment.amount}
+Created At: ${payment.createdAt}`
+            )
+            .join("\n\n")
+        : "No payments found.";
+
+    const result = await generateText({
+      model: openai("gpt-4o-mini"),
+      system:
+        "You are a billing support agent. Answer clearly and briefly using only the billing data provided. If data is missing, say so honestly.",
+      prompt: `User message:
+${input.message}
+
+Available invoice data:
+${invoiceContext}
+
+Available payment data:
+${paymentContext}`
+    });
 
     return {
       agent: "billing",
-      response:
-        latestInvoice.length > 0 && latestPayment.length > 0
-          ? `Latest invoice ${latestInvoice[0].invoiceNumber} is ${latestInvoice[0].status}, and the latest payment is ${latestPayment[0].status}.`
-          : "I could not find enough billing data yet.",
-      reasoning: ["Classified as billing-related query", "Fetched invoices and payments from database"],
+      response: result.text,
+      reasoning: [
+        "Classified as billing-related query",
+        "Fetched invoices and payments from database",
+        "Generated grounded billing response with AI"
+      ],
       data: {
-        invoice: latestInvoice[0] ?? null,
-        payment: latestPayment[0] ?? null
+        invoices: latestInvoices,
+        payments: latestPayments
       }
     };
   }
