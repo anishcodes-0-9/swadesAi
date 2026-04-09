@@ -1,111 +1,162 @@
 # SwadesAI
 
-Fullstack engineering assessment project for an AI-powered customer support system with a multi-agent architecture.
+AI-powered multi-agent customer support system — built as a fullstack engineering assessment.
 
-## Goal
+**Live Demo:** [https://swades-ai-web-qfd9.vercel.app/](https://swades-ai-web-qfd9.vercel.app/)
 
-Build a fullstack application where a router agent analyzes incoming customer queries and delegates work to specialized sub-agents:
+---
 
-- Support Agent
-- Order Agent
-- Billing Agent
+## Overview
 
-The system should maintain conversational context across messages, stream AI responses, and persist conversation history in a PostgreSQL database.
+SwadesAI routes user queries to specialized AI agents based on intent:
 
-## Planned Stack
+- **Support Agent** — troubleshooting and general help
+- **Order Agent** — order status, shipping, and tracking
+- **Billing Agent** — invoices, payments, and refunds
 
-### Frontend
+Conversations are persisted in PostgreSQL, responses are streamed, and a chat UI ties it all together.
 
-- React
-- Vite
-- TypeScript
+---
 
-### Backend
+## Tech Stack
 
-- Hono
-- Vercel AI SDK
-- TypeScript
+| Layer    | Tech                                  |
+| -------- | ------------------------------------- |
+| Frontend | React, Vite, TypeScript               |
+| Backend  | Hono, TypeScript, Vercel AI SDK       |
+| AI       | OpenAI API                            |
+| Database | PostgreSQL, Drizzle ORM               |
+| Infra    | Turborepo, pnpm, Vercel, Render, Neon |
 
-### Database
+---
 
-- PostgreSQL
-- Drizzle ORM
+## Features
 
-### Architecture
+- AI router agent for intent classification
+- Specialized support, order, and billing agents
+- Streamed responses from backend to UI
+- PostgreSQL-backed conversation and message persistence
+- Sidebar-based conversation switching and new chat flow
+- Request validation and structured error responses
 
-- Turborepo monorepo
-- Hono RPC for end-to-end type safety
-- Controller/service separation
-- Middleware-based error handling
+### API Endpoints
 
-## Planned Monorepo Structure
+```
+GET    /health
+GET    /agents
+GET    /agents/:type/capabilities
+GET    /conversations
+GET    /conversations/:id
+DELETE /conversations/:id
+POST   /messages
+POST   /messages/stream
+```
 
-```text
+---
+
+## Monorepo Structure
+
+```
 .
 ├── apps/
 │   ├── api/        # Hono backend
 │   └── web/        # React + Vite frontend
 ├── packages/
-│   └── db/         # Drizzle schema, queries, seed scripts
+│   └── db/         # Drizzle schema, client, migrations, seed
 └── turbo.json
 ```
 
-## Features We Plan To Build
+---
 
-### Core
+## How To Run Locally
 
-- Multi-agent backend with Router, Support, Order, and Billing agents
-- AI-powered routing and fallback handling
-- Streaming chat responses
-- Conversation and message persistence
-- User conversation history
-- Database-backed tools for each agent
-- Seeded sample business data for orders, payments, invoices, and conversations
-- Clean API design with proper error handling
+```bash
+# 1. Install dependencies
+pnpm install
 
-### Bonus Targets
+# 2. Start PostgreSQL
+brew services start postgresql@14
 
-- Turborepo monorepo setup
-- Hono RPC end-to-end typing
-- Agent reasoning / status loader in the UI
-- Basic rate limiting
-- Live deployment
+# 3. Create the database
+createdb swades_ai
 
-## Planned API Surface
+# 4. Add environment variables (.env at root)
+DATABASE_URL=postgres://YOUR_USERNAME@localhost:5432/swades_ai
+OPENAI_API_KEY=your_openai_api_key_here
 
-- `POST /messages` - send a new message
-- `GET /conversations/:id` - fetch one conversation with history
-- `GET /conversations` - list conversations
-- `DELETE /conversations/:id` - delete a conversation
-- `GET /agents` - list available agents
-- `GET /agents/:type/capabilities` - fetch agent capabilities
-- `GET /health` - health check
+# 5. Migrate and seed
+export $(grep -v '^#' .env | xargs)
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
 
-## Planned Database Models
+# 6. Run backend (http://localhost:3001)
+pnpm --filter api dev
 
-- `conversations`
-- `messages`
-- `orders`
-- `payments`
-- `invoices`
+# 7. Run frontend (http://localhost:5173)
+pnpm --filter web dev
+```
 
-## Delivery Plan
+---
 
-1. Scaffold Turborepo with `apps/web`, `apps/api`, and `packages/db`
-2. Add PostgreSQL + Drizzle schema and seed data
-3. Build router and sub-agent services with database-backed tools
-4. Implement streaming Hono API endpoints
-5. Build React chat UI with conversation list and thread view
-6. Add loading states, typing indicators, and error handling
-7. Deploy frontend and backend
-8. Record Loom walkthrough and submit GitHub repo
+## Environment Variables
 
-## Deployment Plan
+**Backend**
 
-- Frontend: Vercel
-- Backend: Railway or Render
-- Database: Neon or Supabase Postgres
+```env
+DATABASE_URL=your_neon_connection_string
+OPENAI_API_KEY=your_openai_api_key
+PORT=10000
+```
 
-## Status
+**Frontend**
 
-This repository is currently in the setup phase. The first milestone is scaffolding the monorepo and establishing the shared database package.
+```env
+VITE_API_BASE_URL=https://your-render-backend-url.onrender.com
+```
+
+---
+
+## Suggested Test Prompts
+
+| Agent   | Prompt                                                    |
+| ------- | --------------------------------------------------------- |
+| Support | `I can't log in to my account. What should I do?`         |
+| Order   | `Where is my order? Can you show me the tracking status?` |
+| Billing | `Did my payment go through? Check my invoice status.`     |
+| Mixed   | `My order was cancelled and I need a refund.`             |
+
+---
+
+## Architectural Notes
+
+- **Hono** — lightweight and fast, ideal for a TypeScript backend without boilerplate
+- **Drizzle ORM** — typed schema definitions, clean migrations, minimal overhead
+- **Multi-agent separation** — support, order, and billing are distinct enough to warrant focused agents
+- **Streaming** — creates a realistic assistant UX matching modern chat expectations
+- **Render + Vercel + Neon** — fastest reliable deployment path for this stack
+
+---
+
+## Known Tradeoffs
+
+- Demo-style identity model (no auth)
+- Conversation titles generated simply from the first prompt
+- Multi-intent routing not yet deeply optimized
+- Delete chat not yet surfaced in the frontend UI
+
+---
+
+## Future Improvements
+
+- Smarter conversation title generation
+- Improved multi-intent routing
+- Delete chat in the frontend
+- Rate limiting and context compaction
+- Richer streaming indicators and agent status chips
+
+---
+
+## Author
+
+Built by **Anish Krishnan** as a fullstack engineering assessment.
