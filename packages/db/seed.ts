@@ -2,6 +2,12 @@ import { db, sql } from "./client";
 import { conversations, messages, orders, payments, invoices } from "./schema";
 
 async function main() {
+  await db.delete(messages);
+  await db.delete(conversations);
+  await db.delete(invoices);
+  await db.delete(payments);
+  await db.delete(orders);
+
   const insertedOrders = await db
     .insert(orders)
     .values([

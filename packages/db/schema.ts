@@ -5,8 +5,8 @@ export const conversations = pgTable("conversations", {
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   title: text("title").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });
 
 export const messages = pgTable("messages", {
@@ -16,7 +16,7 @@ export const messages = pgTable("messages", {
     .references(() => conversations.id),
   role: text("role").notNull(),
   content: text("content").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull()
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
 
 export const orders = pgTable("orders", {
@@ -27,8 +27,8 @@ export const orders = pgTable("orders", {
   trackingNumber: text("tracking_number"),
   shippingAddress: text("shipping_address").notNull(),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });
 
 export const payments = pgTable("payments", {
@@ -39,7 +39,7 @@ export const payments = pgTable("payments", {
   status: text("status").notNull(),
   paymentMethod: text("payment_method").notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull()
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
 
 export const invoices = pgTable("invoices", {
@@ -50,5 +50,5 @@ export const invoices = pgTable("invoices", {
   invoiceNumber: text("invoice_number").notNull(),
   status: text("status").notNull(),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
-  issuedAt: timestamp("issued_at").defaultNow().notNull()
+  issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow().notNull()
 });

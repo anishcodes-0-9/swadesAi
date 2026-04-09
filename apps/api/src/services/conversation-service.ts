@@ -43,6 +43,14 @@ export class ConversationService {
     content: string;
   }) {
     const inserted = await db.insert(messages).values(input).returning();
+
+    await db
+      .update(conversations)
+      .set({
+        updatedAt: new Date()
+      })
+      .where(eq(conversations.id, input.conversationId));
+
     return inserted[0];
   }
 
