@@ -8,7 +8,10 @@ const routerAgent = new RouterAgent();
 
 export class StreamMessageController {
   async streamMessage(input: { conversationId?: string; content: string }) {
-    const conversationId = await conversationService.createConversationIfNeeded(input.conversationId);
+    const conversationId = await conversationService.createConversationIfNeeded(
+      input.conversationId,
+      input.content
+    );
 
     await conversationService.addMessage({
       conversationId,

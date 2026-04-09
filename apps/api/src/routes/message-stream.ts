@@ -26,7 +26,9 @@ app.post("/", async (c) => {
     content: fullText
   });
 
-  return result.toTextStreamResponse();
+  const response = result.toTextStreamResponse();
+  response.headers.set("x-conversation-id", conversationId);
+  return response;
 });
 
 export default app;

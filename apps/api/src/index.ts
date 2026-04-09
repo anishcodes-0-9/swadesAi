@@ -11,6 +11,7 @@ import messageRoutes from "./routes/messages";
 import messageStreamRoutes from "./routes/message-stream";
 
 const app = new Hono();
+const port = Number(process.env.PORT || 3001);
 
 app.use("*", logger());
 app.use("*", cors());
@@ -22,17 +23,12 @@ app.route("/conversations", conversationRoutes);
 app.route("/messages", messageRoutes);
 app.route("/messages/stream", messageStreamRoutes);
 
-app.get("/", (c) => {
-  return c.json({
-    name: "SwadesAI API",
-    status: "ok"
-  });
-});
+app.get("/", (c) => c.json({ name: "SwadesAI API", status: "ok" }));
 
 serve(
   {
     fetch: app.fetch,
-    port: 3001
+    port
   },
   (info) => {
     console.log(`API running on http://localhost:${info.port}`);

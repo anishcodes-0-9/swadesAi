@@ -1,9 +1,9 @@
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc } from "drizzle-orm";
 import { db, conversations, messages } from "../lib/db";
 
 export class ConversationService {
   async listConversations() {
-    return db.select().from(conversations);
+    return db.select().from(conversations).orderBy(desc(conversations.updatedAt));
   }
 
   async getConversation(id: string) {
@@ -20,17 +20,22 @@ export class ConversationService {
     };
   }
 
-  async createConversationIfNeeded(conversationId?: string) {
+  async createConversationIfNeeded(conversationId?: string, firstMessage?: string) {
     if (conversationId) {
       return conversationId;
     }
+
+    const title = firstMessage?.trim()
+      ? firstMessage.trim().slice(0, 40)
+      : "New chat";
 
     const created = await db
       .insert(conversations)
       .values({
         customerName: "Demo User",
         customerEmail: "demo@example.com",
-        title: "New chat"
+        title,
+        updatedAt: new Date()
       })
       .returning();
 

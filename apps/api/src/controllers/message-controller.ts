@@ -6,7 +6,10 @@ const routerAgent = new RouterAgent();
 
 export class MessageController {
   async sendMessage(input: { conversationId?: string; content: string }) {
-    const conversationId = await conversationService.createConversationIfNeeded(input.conversationId);
+    const conversationId = await conversationService.createConversationIfNeeded(
+      input.conversationId,
+      input.content
+    );
 
     const userMessage = await conversationService.addMessage({
       conversationId,
