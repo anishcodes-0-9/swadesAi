@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.13",
+    "@swades-ai/db": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.12.12"
   }
 }
